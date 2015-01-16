@@ -2,24 +2,45 @@
 
 class Main extends MX_Controller {
 
-	/**
-	 * Index Page for this controller.
-	 *
-	 * Maps to the following URL
-	 * 		http://example.com/index.php/welcome
-	 *	- or -  
-	 * 		http://example.com/index.php/welcome/index
-	 *	- or -
-	 * Since this controller is set as the default controller in 
-	 * config/routes.php, it's displayed at http://example.com/
-	 *
-	 * So any other public methods not prefixed with an underscore will
-	 * map to /index.php/welcome/<method_name>
-	 * @see http://codeigniter.com/user_guide/general/urls.html
-	 */
+	function __construct(){
+		parent::__construct();
+		$this->load->model('main_model');
+	}
+
 	public function index()
 	{
-		$this->load->view('main_view');
+		loadBackLayout('main_view');
+	}
+
+	function registerUser(){
+		if($this->input->post()){
+			$this->form_validation->set_error_delimiters('<p class="alert alert-danger">', '</p>');
+	    
+		    $this->form_validation->set_rules('user_email', 'Email', 'required|xss_clean|trim|valid_email|is_unique[users.user_email]');
+		    $this->form_validation->set_rules('user_pass', 'Password', 'required|min_length[5]|max_length[12]');
+		    $this->form_validation->set_rules('user_fname', 'Firstname', 'required');
+		    $this->form_validation->set_rules('user_lname', 'Lastname', 'required');
+		    $this->form_validation->set_rules('user_mobile', 'Mobile', 'required');
+		    
+		    $this->form_validation->set_message('required', '%s is required');
+
+		    if ($this->form_validation->run() == FALSE){
+		      echo json_encode(array("email" 	=> form_error('user_email'),
+		                             "password" => form_error('user_pass'),
+		                             "fname" 	=> form_error('user_fname'),
+		                             "lname" 	=> form_error('user_lname'),
+		                             "mobile" 	=> form_error('user_mobile'),
+		                             "stats"    => 1
+		            ));
+		    }else{
+
+		      $user_id = $this->main_model->saveUser($this->input->post());
+
+		      echo json_encode(array("stats" => 0));
+		    }
+		}else{
+
+		}
 	}
 }
 
